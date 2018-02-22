@@ -1,0 +1,1 @@
+exports.errorMessage = (message) => ({ message });

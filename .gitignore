@@ -1,0 +1,8 @@
+# IntelliJ
+/ParentsService.iml
+/.idea/
+
+# Node
+/node_modules/
+
+/.env
