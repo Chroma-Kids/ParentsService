@@ -1,1 +1,0 @@
-exports.errorMessage = (message) => ({ message });
