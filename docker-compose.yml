@@ -1,0 +1,24 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:latest
+    ports:
+     - ${PARENTS_DB_PORT}:${PARENTS_DB_PORT}
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${PARENTS_DB_NAME}
+      - MYSQL_USER=${PARENTS_DB_USER}
+      - MYSQL_PASSWORD=${PARENTS_DB_PASSWORD}
+  parents-serivce:
+    image: chromakids/parents-service:latest
+    depends_on:
+      - mysql
+    ports:
+      - ${PARENTS_SERVICE_PORT}:${PARENTS_SERVICE_PORT}
+    environment:
+      - PARENTS_SERVICE_PORT=${PARENTS_SERVICE_PORT}
+      - PARENTS_DB_HOST=mysql
+      - PARENTS_DB_PORT=${PARENTS_DB_PORT}
+      - PARENTS_DB_NAME=${PARENTS_DB_NAME}
+      - PARENTS_DB_USER=${PARENTS_DB_USER}
+      - PARENTS_DB_PASSWORD=${PARENTS_DB_PASSWORD}
