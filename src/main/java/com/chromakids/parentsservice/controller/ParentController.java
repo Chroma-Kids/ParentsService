@@ -58,7 +58,7 @@ public class ParentController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Parent> deleteNote(@PathVariable(value = "id") Long parentId) {
+  public ResponseEntity<Parent> deleteParent(@PathVariable(value = "id") Long parentId) {
     Parent parent = parentRepository.findOne(parentId);
     if (parent == null) {
       return ResponseEntity.notFound().build();
