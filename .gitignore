@@ -1,5 +1,5 @@
 # IntelliJ
-/ParentsService.iml
+*.iml
 /.idea/
 *.iml
 /target/
