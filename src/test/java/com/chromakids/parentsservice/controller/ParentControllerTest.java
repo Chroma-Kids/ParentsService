@@ -24,8 +24,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -43,13 +48,14 @@ public class ParentControllerTest {
 
   @Before
   public void setUp() throws ParseException {
+    ZoneOffset timeZone = ZoneOffset.UTC;
     peterParker = new Parent.Builder()
         .setId(1L)
         .setName("Peter")
         .setSurname("Parker")
         .setAddress("5th Avenue")
-        .setCreatedAt(new SimpleDateFormat("d-MMM-yyyy,HH:mm:ss aaa").parse("29-Apr-2010,13:00:14 PM"))
-        .setUpdatedAt(new SimpleDateFormat("d-MMM-yyyy,HH:mm:ss aaa").parse("29-Apr-2010,13:00:14 PM"))
+        .setCreatedAt(Date.from(ZonedDateTime.of(LocalDateTime.of(2017, 5, 12, 5, 45), timeZone).toInstant()))
+        .setUpdatedAt(Date.from(ZonedDateTime.of(LocalDateTime.of(2017, 6, 1, 7, 55), timeZone).toInstant()))
         .createParent();
 
     bruceWayne = new Parent.Builder()
@@ -57,8 +63,8 @@ public class ParentControllerTest {
         .setName("Bruce")
         .setSurname("Wayne")
         .setAddress("Gotham")
-        .setCreatedAt(new SimpleDateFormat("d-MMM-yyyy,HH:mm:ss aaa").parse("27-Apr-2010,13:00:14 PM"))
-        .setUpdatedAt(new SimpleDateFormat("d-MMM-yyyy,HH:mm:ss aaa").parse("29-Apr-2010,13:00:54 PM"))
+        .setCreatedAt(Date.from(ZonedDateTime.of(LocalDateTime.of(2016, 3, 23, 15, 38), timeZone).toInstant()))
+        .setUpdatedAt(Date.from(ZonedDateTime.of(LocalDateTime.of(2018, 8, 21, 23, 49), timeZone).toInstant()))
         .createParent();
   }
 
@@ -77,7 +83,7 @@ public class ParentControllerTest {
 
     mockMvc.perform(get("/parents"))
         .andExpect(status().isOk())
-        .andExpect(content().json("[{\"id\":1,\"name\":\"Peter\",\"surname\":\"Parker\",\"address\":\"5th Avenue\",\"createdAt\":1272542414000,\"updatedAt\":1272542414000},{\"id\":2,\"name\":\"Bruce\",\"surname\":\"Wayne\",\"address\":\"Gotham\",\"createdAt\":1272369614000,\"updatedAt\":1272542454000}]"));
+        .andExpect(content().json("[{\"id\":1,\"name\":\"Peter\",\"surname\":\"Parker\",\"address\":\"5th Avenue\",\"createdAt\":1494567900000,\"updatedAt\":1496303700000},{\"id\":2,\"name\":\"Bruce\",\"surname\":\"Wayne\",\"address\":\"Gotham\",\"createdAt\":1458747480000,\"updatedAt\":1534895340000}]"));
   }
 
   @Test
@@ -86,7 +92,7 @@ public class ParentControllerTest {
 
     mockMvc.perform(get("/parents/1"))
         .andExpect(status().isOk())
-        .andExpect(content().json("{\"id\":1,\"name\":\"Peter\",\"surname\":\"Parker\",\"address\":\"5th Avenue\",\"createdAt\":1272542414000,\"updatedAt\":1272542414000}"));
+        .andExpect(content().json("{\"id\":1,\"name\":\"Peter\",\"surname\":\"Parker\",\"address\":\"5th Avenue\",\"createdAt\":1494567900000,\"updatedAt\":1496303700000}"));
   }
 
   @Test
@@ -121,7 +127,7 @@ public class ParentControllerTest {
 
     mockMvc.perform(put("/parents/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Peter\",\"surname\":\"Griffin\",\"address\":\"5th Avenue\"}"))
         .andExpect(status().isOk())
-        .andExpect(content().json("{\"id\":1,\"name\":\"Peter\",\"surname\":\"Griffin\",\"address\":\"5th Avenue\",\"createdAt\":1272542414000,\"updatedAt\":1272542414000}"));
+        .andExpect(content().json("{\"id\":1,\"name\":\"Peter\",\"surname\":\"Griffin\",\"address\":\"5th Avenue\",\"createdAt\":1494567900000,\"updatedAt\":1496303700000}"));
   }
 
   @Test
