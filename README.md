@@ -19,6 +19,7 @@ PARENTS_SERVICE_PORT
 ```shell
 # To create the image:
 mvn clean package dockerfile:build -DskipTests
+
 # To run it:
 docker-compose up
 
