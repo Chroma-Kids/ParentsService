@@ -16,12 +16,15 @@ PARENTS_DB_PASSWORD
 
 PARENTS_SERVICE_PORT
 ```
-To run it:
-`mvn clean package dockerfile:build -DskipTests`
-`docker-compose up`
+```shell
+# To create the image:
+mvn clean package dockerfile:build -DskipTests
+# To run it:
+docker-compose up
 
-To stop it:
-`docker-compose stop`
+# To stop it:
+docker-compose stop
 
-To remove it:
-`docker-compose rm`
+# To remove it:
+docker-compose rm
+```
