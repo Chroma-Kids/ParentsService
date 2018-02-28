@@ -1,12 +1,15 @@
 package com.chromakids.parentsservice.controller;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.chromakids.parentsservice.model.Parent;
@@ -19,18 +22,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -47,7 +50,7 @@ public class ParentControllerTest {
   private Parent bruceWayne;
 
   @Before
-  public void setUp() throws ParseException {
+  public void setUp() {
     ZoneOffset timeZone = ZoneOffset.UTC;
     peterParker = new Parent.Builder()
         .setId(1L)
@@ -72,8 +75,14 @@ public class ParentControllerTest {
   public void shouldReturnAnEmptyListOfParents() throws Exception {
     when(repository.findAll()).thenReturn(Collections.emptyList());
 
-    mockMvc.perform(get("/parents"))
+    MvcResult mvcResult = mockMvc.perform(get("/parents"))
+        .andExpect(request().asyncStarted())
+        .andExpect(request().asyncResult(Collections.EMPTY_LIST))
+        .andReturn();
+
+    mockMvc.perform(asyncDispatch(mvcResult))
         .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(content().json("[]"));
   }
 
@@ -81,8 +90,14 @@ public class ParentControllerTest {
   public void shouldReturnAListOfParents() throws Exception {
     when(repository.findAll()).thenReturn(Arrays.asList(peterParker, bruceWayne));
 
-    mockMvc.perform(get("/parents"))
+    MvcResult mvcResult = mockMvc.perform(get("/parents"))
+        .andExpect(request().asyncStarted())
+        .andExpect(request().asyncResult(instanceOf(List.class)))
+        .andReturn();
+
+    mockMvc.perform(asyncDispatch(mvcResult))
         .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(content().json("[{\"id\":1,\"name\":\"Peter\",\"surname\":\"Parker\",\"address\":\"5th Avenue\",\"createdAt\":1494567900000,\"updatedAt\":1496303700000},{\"id\":2,\"name\":\"Bruce\",\"surname\":\"Wayne\",\"address\":\"Gotham\",\"createdAt\":1458747480000,\"updatedAt\":1534895340000}]"));
   }
 
@@ -90,8 +105,14 @@ public class ParentControllerTest {
   public void shouldReturnAnExistingParent() throws Exception {
     when(repository.findOne(any(Long.class))).thenReturn(peterParker);
 
-    mockMvc.perform(get("/parents/1"))
+    MvcResult mvcResult = mockMvc.perform(get("/parents/1"))
+        .andExpect(request().asyncStarted())
+        .andExpect(request().asyncResult(instanceOf(ResponseEntity.class)))
+        .andReturn();
+
+    mockMvc.perform(asyncDispatch(mvcResult))
         .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(content().json("{\"id\":1,\"name\":\"Peter\",\"surname\":\"Parker\",\"address\":\"5th Avenue\",\"createdAt\":1494567900000,\"updatedAt\":1496303700000}"));
   }
 
@@ -99,7 +120,12 @@ public class ParentControllerTest {
   public void shouldReturnNotFoundWhenGettingANonExistingParent() throws Exception {
     when(repository.findOne(any(Long.class))).thenReturn(null);
 
-    mockMvc.perform(get("/parents/1"))
+    MvcResult mvcResult = mockMvc.perform(get("/parents/1"))
+        .andExpect(request().asyncStarted())
+        .andExpect(request().asyncResult(instanceOf(ResponseEntity.class)))
+        .andReturn();
+
+    mockMvc.perform(asyncDispatch(mvcResult))
         .andExpect(status().isNotFound());
   }
 
@@ -107,8 +133,14 @@ public class ParentControllerTest {
   public void shouldReturnAParentAfterItsCreation() throws Exception {
     when(repository.save(any(Parent.class))).thenReturn(peterParker);
 
-    mockMvc.perform(post("/parents").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Peter\",\"surname\":\"Parker\",\"address\":\"5th Avenue\"}"))
+    MvcResult mvcResult = mockMvc.perform(post("/parents").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Peter\",\"surname\":\"Parker\",\"address\":\"5th Avenue\"}"))
+        .andExpect(request().asyncStarted())
+        .andExpect(request().asyncResult(instanceOf(Parent.class)))
+        .andReturn();
+
+    mockMvc.perform(asyncDispatch(mvcResult))
         .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(content().json("{\"id\":1,\"name\":\"Peter\",\"surname\":\"Parker\",\"address\":\"5th Avenue\"}"));
   }
 
@@ -116,7 +148,12 @@ public class ParentControllerTest {
   public void shouldReturnNotFoundWhenUpdatingANonExistingParent() throws Exception {
     when(repository.findOne(any(Long.class))).thenReturn(null);
 
-    mockMvc.perform(put("/parents/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Peter\",\"surname\":\"Griffin\",\"address\":\"5th Avenue\"}"))
+    MvcResult mvcResult = mockMvc.perform(put("/parents/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Peter\",\"surname\":\"Griffin\",\"address\":\"5th Avenue\"}"))
+        .andExpect(request().asyncStarted())
+        .andExpect(request().asyncResult(instanceOf(ResponseEntity.class)))
+        .andReturn();
+
+    mockMvc.perform(asyncDispatch(mvcResult))
         .andExpect(status().isNotFound());
   }
 
@@ -125,8 +162,14 @@ public class ParentControllerTest {
     when(repository.findOne(any(Long.class))).thenReturn(peterParker);
     when(repository.save(any(Parent.class))).thenReturn(new Parent(peterParker.getId(), peterParker.getName(), "Griffin", peterParker.getAddress(), peterParker.getCreatedAt(), peterParker.getUpdatedAt()));
 
-    mockMvc.perform(put("/parents/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Peter\",\"surname\":\"Griffin\",\"address\":\"5th Avenue\"}"))
+    MvcResult mvcResult = mockMvc.perform(put("/parents/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Peter\",\"surname\":\"Griffin\",\"address\":\"5th Avenue\"}"))
+        .andExpect(request().asyncStarted())
+        .andExpect(request().asyncResult(instanceOf(ResponseEntity.class)))
+        .andReturn();
+
+    mockMvc.perform(asyncDispatch(mvcResult))
         .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(content().json("{\"id\":1,\"name\":\"Peter\",\"surname\":\"Griffin\",\"address\":\"5th Avenue\",\"createdAt\":1494567900000,\"updatedAt\":1496303700000}"));
   }
 
@@ -134,7 +177,12 @@ public class ParentControllerTest {
   public void shouldReturnNotFoundWhenDeletingANonExistingParent() throws Exception {
     when(repository.findOne(any(Long.class))).thenReturn(null);
 
-    mockMvc.perform(delete("/parents/1"))
+    MvcResult mvcResult = mockMvc.perform(delete("/parents/1"))
+        .andExpect(request().asyncStarted())
+        .andExpect(request().asyncResult(instanceOf(ResponseEntity.class)))
+        .andReturn();
+
+    mockMvc.perform(asyncDispatch(mvcResult))
         .andExpect(status().isNotFound());
   }
 
@@ -142,7 +190,12 @@ public class ParentControllerTest {
   public void shouldReturnOkWhenDeletingAnExistingParent() throws Exception {
     when(repository.findOne(any(Long.class))).thenReturn(peterParker);
 
-    mockMvc.perform(delete("/parents/1"))
+    MvcResult mvcResult = mockMvc.perform(delete("/parents/1"))
+        .andExpect(request().asyncStarted())
+        .andExpect(request().asyncResult(instanceOf(ResponseEntity.class)))
+        .andReturn();
+
+    mockMvc.perform(asyncDispatch(mvcResult))
         .andExpect(status().isOk());
   }
 }

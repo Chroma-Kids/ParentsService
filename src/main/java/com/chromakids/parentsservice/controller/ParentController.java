@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.validation.Valid;
 
@@ -25,47 +26,53 @@ public class ParentController {
   ParentRepository parentRepository;
 
   @GetMapping("")
-  public List<Parent> getAllParents() {
-    return parentRepository.findAll();
+  public Callable<List<Parent>> getAllParents() {
+    return () -> parentRepository.findAll();
   }
 
   @PostMapping("")
-  public Parent createParent(@Valid @RequestBody Parent parent) {
-    return parentRepository.save(parent);
+  public Callable<Parent> createParent(@Valid @RequestBody Parent parent) {
+    return () -> parentRepository.save(parent);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Parent> getParentById(@PathVariable(value = "id") Long parentId) {
-    Parent parent = parentRepository.findOne(parentId);
-    if (parent == null) {
-      return ResponseEntity.notFound().build();
-    }
-    return ResponseEntity.ok(parent);
+  public Callable<ResponseEntity<Parent>> getParentById(@PathVariable(value = "id") Long parentId) {
+    return () -> {
+      Parent parent = parentRepository.findOne(parentId);
+      if (parent == null) {
+        return ResponseEntity.notFound().build();
+      }
+      return ResponseEntity.ok(parent);
+    };
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Parent> updateParent(@PathVariable(value = "id") Long parentId, @Valid @RequestBody Parent parentDetails) {
-    Parent parent = parentRepository.findOne(parentId);
-    if (parent == null) {
-      return ResponseEntity.notFound().build();
-    }
-    parent.setName(parentDetails.getName());
-    parent.setSurname(parentDetails.getSurname());
-    parent.setAddress(parentDetails.getAddress());
+  public Callable<ResponseEntity<Parent>> updateParent(@PathVariable(value = "id") Long parentId, @Valid @RequestBody Parent parentDetails) {
+    return () -> {
+      Parent parent = parentRepository.findOne(parentId);
+      if (parent == null) {
+        return ResponseEntity.notFound().build();
+      }
+      parent.setName(parentDetails.getName());
+      parent.setSurname(parentDetails.getSurname());
+      parent.setAddress(parentDetails.getAddress());
 
-    Parent updatedNote = parentRepository.save(parent);
-    return ResponseEntity.ok(updatedNote);
+      Parent updatedNote = parentRepository.save(parent);
+      return ResponseEntity.ok(updatedNote);
+    };
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Parent> deleteParent(@PathVariable(value = "id") Long parentId) {
-    Parent parent = parentRepository.findOne(parentId);
-    if (parent == null) {
-      return ResponseEntity.notFound().build();
-    }
+  public Callable<ResponseEntity<Parent>> deleteParent(@PathVariable(value = "id") Long parentId) {
+    return () -> {
+      Parent parent = parentRepository.findOne(parentId);
+      if (parent == null) {
+        return ResponseEntity.notFound().build();
+      }
 
-    parentRepository.delete(parent);
-    return ResponseEntity.ok().build();
+      parentRepository.delete(parent);
+      return ResponseEntity.ok().build();
+    };
   }
 
 }
